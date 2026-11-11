@@ -86,15 +86,16 @@ for flag in GPL NONFREE VERSION3; do
 done
 grep -q '^License: LGPL version 2.1 or later$' "$WORK/configure.out" \
   || fail "configure did not report LGPL version 2.1 or later"
-# The external library sections configure prints: the plain one must be
-# empty, and the hardware one may hold only Windows' own Media Foundation.
+# The external library sections configure prints: the plain one may hold
+# only Windows' own Media Foundation (FFmpeg 9 lists it there), and the
+# hardware one must be empty.
 section() { awk -v h="$1" '$0==h{f=1;next} f&&/^$/{exit} f' "$WORK/configure.out" | tr -s ' \n' ' ' | sed 's/^ *//;s/ *$//'; }
 ext="$(section 'External libraries:')"
 hw="$(section 'External libraries providing hardware acceleration:')"
 echo "External libraries: [${ext}]"
 echo "External libraries providing hardware acceleration: [${hw}]"
-[ -z "$ext" ] || fail "external libraries enabled: $ext"
-[ "$hw" = "mediafoundation" ] || fail "unexpected hardware libraries: $hw"
+[ "$ext" = "mediafoundation" ] || fail "external libraries other than mediafoundation: $ext"
+[ -z "$hw" ] || fail "hardware libraries enabled: $hw"
 
 echo "== build"
 make -j"$(nproc)"
