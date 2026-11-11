@@ -40,10 +40,14 @@ FFmpeg built this way is under the **GNU Lesser General Public License,
 version 2.1 or later** (LGPL-2.1-or-later). The build checks this rather than
 assuming it: it fails if `config.h` has GPL, non-free or version 3 switched
 on, if configure does not report "LGPL version 2.1 or later", if any external
-library is enabled, if `ffmpeg -buildconf` carries `--enable-gpl`,
-`--enable-nonfree`, `--enable-version3` or any `--enable-lib...`, or if any
-exe or DLL imports a DLL from the MinGW toolchain rather than from FFmpeg
-itself or Windows.
+library other than Media Foundation (and D3D11 for hardware) is enabled, if
+`ffmpeg -buildconf` carries `--enable-gpl`, `--enable-nonfree`,
+`--enable-version3` or any `--enable-lib...`, or if any exe or DLL imports a
+DLL from the MinGW toolchain rather than from FFmpeg itself or Windows.
+
+One piece of toolchain code is linked in: mingw-w64's winpthreads, linked
+statically so that no toolchain DLL has to ship. It is under a permissive
+MIT-style licence, whose text is `COPYING.winpthreads.txt` in the zip.
 
 `COPYING.LGPLv2.1` is inside every zip, beside the DLLs. The build script in
 this repository is offered under the same licence.

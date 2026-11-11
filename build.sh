@@ -51,6 +51,10 @@ CONFIGURE_FLAGS=(
   --enable-ffmpeg
   --enable-ffprobe
   --disable-ffplay
+  # MSYS2's gcc pulls in winpthreads (clock and sleep functions), which
+  # would make avutil import libwinpthread-1.dll from the toolchain. Link
+  # it statically instead; its licence text ships in the zip.
+  --extra-libs=-Wl,-Bstatic,-lwinpthread,-Bdynamic
 )
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -110,9 +114,18 @@ PKG="$WORK/pkg"
 mkdir -p "$PKG/bin"
 cp "$PREFIX"/bin/ffmpeg.exe "$PREFIX"/bin/ffprobe.exe "$PREFIX"/bin/*.dll "$PKG/bin/"
 cp "$SRC/COPYING.LGPLv2.1" "$PKG/bin/"
+WINPTHREADS_LICENCE="$(ls /mingw64/share/licenses/*winpthread*/COPYING* 2>/dev/null | head -1 || true)"
+[ -n "$WINPTHREADS_LICENCE" ] || fail "no winpthreads licence text under /mingw64/share/licenses"
+cp "$WINPTHREADS_LICENCE" "$PKG/bin/COPYING.winpthreads.txt"
+WINPTHREADS_VERSION="$(pacman -Q mingw-w64-x86_64-winpthreads 2>/dev/null || pacman -Q mingw-w64-x86_64-libwinpthread 2>/dev/null || echo unknown)"
 cat > "$PKG/bin/SOURCE.txt" <<EOF
 This is FFmpeg ${FFMPEG_VERSION}, built for MeetOwned under the GNU Lesser
 General Public License version 2.1 or later (COPYING.LGPLv2.1).
+
+The FFmpeg DLLs also carry, linked statically, the mingw-w64 winpthreads
+library (${WINPTHREADS_VERSION}), under the licence in
+COPYING.winpthreads.txt. Its source is https://github.com/mingw-w64/mingw-w64
+(mingw-w64-libraries/winpthreads).
 
 The exact source it was built from, the build log and the build script are
 published with each release of
