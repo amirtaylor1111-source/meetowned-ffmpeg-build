@@ -69,8 +69,8 @@ nasm --version
 uname -a
 
 echo "== source"
-curl -fsSL --retry 5 -o "$DIST/$TARBALL" "https://ffmpeg.org/releases/$TARBALL"
-curl -fsSL --retry 5 -o "$DIST/$TARBALL.asc" "https://ffmpeg.org/releases/$TARBALL.asc"
+curl -fsSL --retry 8 --retry-all-errors --retry-delay 10 -o "$DIST/$TARBALL" "https://ffmpeg.org/releases/$TARBALL"
+curl -fsSL --retry 8 --retry-all-errors --retry-delay 10 -o "$DIST/$TARBALL.asc" "https://ffmpeg.org/releases/$TARBALL.asc"
 echo "$FFMPEG_SHA256 *$DIST/$TARBALL" | sha256sum -c - || fail "source tarball does not match its pinned SHA-256"
 tar -xJf "$DIST/$TARBALL" -C "$WORK"
 SRC="$WORK/ffmpeg-$FFMPEG_VERSION"
