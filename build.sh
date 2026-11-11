@@ -37,7 +37,9 @@ CONFIGURE_FLAGS=(
   --disable-doc
   --disable-debug
   --disable-everything
-  --enable-protocol=file,pipe
+  # fd: FFmpeg 9's ffmpeg reads input "-" as "fd:" (fftools/ffmpeg_demux.c),
+  # and the recorder pipes every frame in through "-i -".
+  --enable-protocol=file,pipe,fd
   --enable-demuxer=rawvideo,mov,mp3,amr,ogg,wav,aac,matroska,image2,flac,avi,asf
   --enable-muxer=mp4,ipod,wav,rawvideo,image2
   --enable-decoder=h264,aac,mp3,mp3float,amrnb,amrwb,opus,vorbis,pcm_s16le,pcm_s24le,pcm_s32le,pcm_u8,pcm_f32le,rawvideo,flac,alac,wmav1,wmav2,ac3,eac3,pcm_alaw,pcm_mulaw,adpcm_ms,adpcm_ima_wav,bmp

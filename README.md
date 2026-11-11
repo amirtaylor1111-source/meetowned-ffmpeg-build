@@ -29,7 +29,7 @@ The full configure line is in [`build.sh`](build.sh). In short:
 | Demuxers | rawvideo, mov, mp3, amr, ogg, wav, aac, matroska, image2, flac, avi, asf |
 | Muxers | mp4, ipod, wav, rawvideo, image2 |
 | Filters | amix, aresample, aformat, scale, format, fps, trim, atrim, null, anull |
-| Other | file and pipe protocols, gdigrab input, swscale, swresample, ffmpeg and ffprobe (no ffplay), no network |
+| Other | file, pipe and fd protocols (FFmpeg 9 reads input `-` through fd), gdigrab input, swscale, swresample, ffmpeg and ffprobe (no ffplay), no network |
 
 Each release's notes print `ffmpeg -buildconf` and the encoder, decoder,
 muxer, demuxer and filter lists of the binary actually built.
