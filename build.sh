@@ -55,6 +55,9 @@ CONFIGURE_FLAGS=(
   # would make avutil import libwinpthread-1.dll from the toolchain. Link
   # it statically instead; its licence text ships in the zip.
   --extra-libs=-Wl,-Bstatic,-lwinpthread,-Bdynamic
+  # The same for libgcc (swscale imported libgcc_s_seh-1.dll). libgcc is
+  # under the GCC Runtime Library Exception, which allows this.
+  --extra-ldflags=-static-libgcc
 )
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -134,14 +137,19 @@ EOF
 
 echo "== imports: every DLL must be one of ours or a Windows system DLL"
 ours="$(cd "$PKG/bin" && ls *.dll | tr 'A-Z' 'a-z')"
+toolchain=""
 for f in "$PKG"/bin/*.exe "$PKG"/bin/*.dll; do
   for dll in $(objdump -p "$f" | awk '/DLL Name:/{print $3}'); do
     lower="$(echo "$dll" | tr 'A-Z' 'a-z')"
     if echo "$ours" | grep -qx "$lower"; then continue; fi
-    [ -e "/mingw64/bin/$dll" ] && fail "$(basename "$f") imports $dll from the MinGW toolchain"
-    echo "$(basename "$f") -> $dll (system)"
+    if [ -e "/mingw64/bin/$dll" ]; then
+      toolchain="$toolchain $(basename "$f")->$dll"
+    else
+      echo "$(basename "$f") -> $dll (system)"
+    fi
   done
-done | sort -u
+done
+[ -z "$toolchain" ] || fail "imports from the MinGW toolchain:$toolchain"
 
 echo "== what was built"
 FF="$PKG/bin/ffmpeg.exe"
