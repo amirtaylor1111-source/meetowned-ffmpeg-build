@@ -15,8 +15,10 @@ pinned in `build.sh`, and the build refuses any other bytes.
 It is a minimal, shared (DLL) build for 64-bit Windows, configured with
 `--disable-everything --disable-autodetect` and then only the components
 MeetOwned uses. Nothing outside FFmpeg is compiled in: no external libraries,
-no GPL or non-free parts. The one outside dependency is Windows' own Media
-Foundation, through which the `h264_mf` encoder makes H.264 video.
+no GPL or non-free parts. The outside dependencies are Windows' own Media
+Foundation, through which the `h264_mf` encoder makes H.264 video, and
+Windows' own Direct3D 11 (`--enable-d3d11va`), which FFmpeg 9.0.2's
+`h264_mf` source needs in order to compile at all.
 
 The full configure line is in [`build.sh`](build.sh). In short:
 

@@ -18,9 +18,12 @@ FFMPEG_VERSION="9.0.2"
 FFMPEG_SHA256="8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
 
 # The configure line. Every component is named; nothing is autodetected.
-# --enable-mediafoundation and --enable-w32threads come after
-# --disable-autodetect, which would otherwise switch both off (the ffmpeg
-# program will not build without a thread library).
+# --enable-mediafoundation, --enable-d3d11va and --enable-w32threads come
+# after --disable-autodetect, which would otherwise switch them off. The
+# ffmpeg program will not build without a thread library, and in n9.0.2
+# libavcodec/mfenc.c (h264_mf) uses D3D11 types whose header it includes
+# only under CONFIG_D3D11VA, so h264_mf does not compile without d3d11va.
+# Both Media Foundation and D3D11 are Windows' own system components.
 CONFIGURE_FLAGS=(
   --arch=x86_64
   --target-os=mingw32
@@ -28,6 +31,7 @@ CONFIGURE_FLAGS=(
   --disable-static
   --disable-autodetect
   --enable-mediafoundation
+  --enable-d3d11va
   --enable-w32threads
   --disable-network
   --disable-doc
@@ -88,14 +92,14 @@ grep -q '^License: LGPL version 2.1 or later$' "$WORK/configure.out" \
   || fail "configure did not report LGPL version 2.1 or later"
 # The external library sections configure prints: the plain one may hold
 # only Windows' own Media Foundation (FFmpeg 9 lists it there), and the
-# hardware one must be empty.
+# hardware one only Windows' own D3D11 (d3d11va).
 section() { awk -v h="$1" '$0==h{f=1;next} f&&/^$/{exit} f' "$WORK/configure.out" | tr -s ' \n' ' ' | sed 's/^ *//;s/ *$//'; }
 ext="$(section 'External libraries:')"
 hw="$(section 'External libraries providing hardware acceleration:')"
 echo "External libraries: [${ext}]"
 echo "External libraries providing hardware acceleration: [${hw}]"
 [ "$ext" = "mediafoundation" ] || fail "external libraries other than mediafoundation: $ext"
-[ -z "$hw" ] || fail "hardware libraries enabled: $hw"
+[ "$hw" = "d3d11va" ] || fail "hardware libraries other than d3d11va: $hw"
 
 echo "== build"
 make -j"$(nproc)"
